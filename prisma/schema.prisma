@@ -6,3 +6,15 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 }
+
+//tabela Users
+model User {         // alto incremeto como id
+  id         String @id @default(uuid())
+  name       String
+  github_id  Int
+  avatar_url String
+  login      String
+
+  //nome que a tabela vai ter no DB / quando criar a tabela o model User vai ter o nome de Users
+  @@map("Users")
+}
