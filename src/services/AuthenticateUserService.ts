@@ -1,6 +1,6 @@
 import axios from "axios";
 import prismaClient from "../prisma"
-
+import { sign } from "jsonwebtoken"
 /**
  * Receber code(String)
  * Recupar o access_token no github
@@ -21,7 +21,7 @@ interface IUserResponse {
     login: string,
     name: string,
     id: number,
-    
+
 }
 
 class AuthenticateUserService {
@@ -59,9 +59,9 @@ class AuthenticateUserService {
             }
         })
         //se nao tiver usuario com o msm id, entao crio um
-        if(!user) {
-           user = await prismaClient.user.create({
-                data:{
+        if (!user) {
+            user = await prismaClient.user.create({
+                data: {
                     avatar_url,
                     github_id: id,
                     login,
@@ -69,6 +69,25 @@ class AuthenticateUserService {
                 }
             })
         }
+
+        //gerando token
+        const token = sign(
+            {
+                user: {
+                    name: user.name,
+                    avatar_url: user.avatar_url,
+                    id: user.id
+                }
+            },
+            process.env.JWT_SECRET,
+            {
+                subject: user.id,
+                expiresIn: "1d"
+            }
+        );
+        return {token, user}
+
+
         //toda info q eh retornada é atribuida ao data
         return response.data;
     }
