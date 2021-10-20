@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import prismaClient from "../prisma"
 
 /**
  * Receber code(String)
@@ -20,7 +20,8 @@ interface IUserResponse {
     avatar_url: string,
     login: string,
     name: string,
-    id: string
+    id: number,
+    
 }
 
 class AuthenticateUserService {
@@ -45,7 +46,29 @@ class AuthenticateUserService {
             },
         });
 
+        const { avatar_url,
+            login,
+            name,
+            id } = response.data;
 
+
+        //verificando se existe um usuario fazendo um select onde o github_id(db) tem que ser igual ao  id(passado pelo github)
+        let user = await prismaClient.user.findFirst({
+            where: {
+                github_id: id,
+            }
+        })
+        //se nao tiver usuario com o msm id, entao crio um
+        if(!user) {
+           user = await prismaClient.user.create({
+                data:{
+                    avatar_url,
+                    github_id: id,
+                    login,
+                    name,
+                }
+            })
+        }
         //toda info q eh retornada é atribuida ao data
         return response.data;
     }
