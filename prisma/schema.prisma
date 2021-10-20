@@ -8,7 +8,7 @@ generator client {
 }
 
 //tabela Users
-model User {         // alto incremeto como id
+model User {
   id         String @id @default(uuid())
   name       String
   github_id  Int
@@ -17,4 +17,16 @@ model User {         // alto incremeto como id
 
   //nome que a tabela vai ter no DB / quando criar a tabela o model User vai ter o nome de Users
   @@map("Users")
+  messages Message[]
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  text       String
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("message")
+  user_id String
 }
